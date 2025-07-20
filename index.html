@@ -1,0 +1,664 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Investment Club Tracker</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.9em;
+        }
+        
+        input, select {
+            padding: 10px;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .delete-btn {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        
+        .delete-btn:hover {
+            box-shadow: 0 3px 10px rgba(231, 76, 60, 0.4);
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        
+        th {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 10px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        td {
+            padding: 12px 10px;
+            text-align: center;
+            border-bottom: 1px solid #e0e6ed;
+            font-size: 13px;
+        }
+        
+        tr:nth-child(even) {
+            background: rgba(102, 126, 234, 0.02);
+        }
+        
+        tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+        
+        .member-name {
+            font-weight: 600;
+            color: #2c3e50;
+            text-align: left !important;
+            padding-left: 15px;
+            min-width: 120px;
+        }
+        
+        .amount-input {
+            width: 80px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        
+        .amount-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+        }
+        
+        .below-min {
+            background-color: #ffebee;
+            border-color: #f44336;
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .summary-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            border: 3px solid transparent;
+            background: linear-gradient(white, white) padding-box,
+                       linear-gradient(45deg, #667eea, #764ba2) border-box;
+            transition: transform 0.3s ease;
+        }
+        
+        .summary-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .summary-card h3 {
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+        }
+        
+        .summary-card .value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 0;
+        }
+        
+        .conversion-section {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+        }
+        
+        .conversion-section h3 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        
+        .quarterly-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .quarter-card {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .quarter-card:hover {
+            background: rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .quarter-card.current {
+            background: rgba(102, 126, 234, 0.2);
+            border: 2px solid #667eea;
+        }
+        
+        .download-section {
+            text-align: center;
+            margin: 30px 0;
+            padding: 25px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 15px;
+        }
+        
+        .download-btn {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            font-size: 16px;
+            padding: 15px 30px;
+        }
+        
+        .download-btn:hover {
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+        }
+        
+        .instructions {
+            background: rgba(52, 152, 219, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #3498db;
+        }
+        
+        .instructions h4 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        
+        .instructions ul {
+            color: #34495e;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .control-group {
+                width: 100%;
+            }
+            
+            input, select {
+                width: 100%;
+                box-sizing: border-box;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Family Investment Club Tracker</h1>
+        <p class="subtitle">Track monthly contributions, shareholdings, and quarterly USD conversions</p>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label>Minimum Monthly Amount (RWF)</label>
+                <input type="number" id="minAmount" value="50000" min="0" />
+            </div>
+            <div class="control-group">
+                <label>USD Exchange Rate</label>
+                <input type="number" id="exchangeRate" value="1350" min="0" step="0.01" />
+            </div>
+            <div class="control-group">
+                <label>Current Month</label>
+                <select id="currentMonth">
+                    <option value="0">January</option>
+                    <option value="1">February</option>
+                    <option value="2">March</option>
+                    <option value="3">April</option>
+                    <option value="4">May</option>
+                    <option value="5">June</option>
+                    <option value="6" selected>July</option>
+                    <option value="7">August</option>
+                    <option value="8">September</option>
+                    <option value="9">October</option>
+                    <option value="10">November</option>
+                    <option value="11">December</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Add New Member</label>
+                <input type="text" id="memberNameInput" placeholder="Enter member name" style="width: 150px;" />
+            </div>
+            <button onclick="addMember()">Add Member</button>
+            <button onclick="calculateAll()">Update Calculations</button>
+        </div>
+
+        <div class="instructions">
+            <h4>How to Use:</h4>
+            <ul>
+                <li>Set your minimum monthly amount and current USD exchange rate</li>
+                <li>Add family members using the "Add Member" button</li>
+                <li>Enter monthly contributions for each member (minimum or more)</li>
+                <li>The system automatically calculates shareholding percentages</li>
+                <li>Quarterly conversions to USD are highlighted in the summary</li>
+                <li>Press Enter after typing a member name to quickly add them</li>
+                <li>Download the Excel template with all formulas included</li>
+            </ul>
+        </div>
+        
+        <div class="table-container">
+            <table id="contributionsTable">
+                <thead>
+                    <tr>
+                        <th>Member Name</th>
+                        <th>Jan</th>
+                        <th>Feb</th>
+                        <th>Mar</th>
+                        <th>Apr</th>
+                        <th>May</th>
+                        <th>Jun</th>
+                        <th>Jul</th>
+                        <th>Aug</th>
+                        <th>Sep</th>
+                        <th>Oct</th>
+                        <th>Nov</th>
+                        <th>Dec</th>
+                        <th>Total (RWF)</th>
+                        <th>Share %</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="membersBody"></tbody>
+                <tfoot>
+                    <tr style="background: linear-gradient(45deg, #667eea, #764ba2); color: white;">
+                        <td style="font-weight: bold;">MONTHLY TOTALS</td>
+                        <td id="total-0">0</td>
+                        <td id="total-1">0</td>
+                        <td id="total-2">0</td>
+                        <td id="total-3">0</td>
+                        <td id="total-4">0</td>
+                        <td id="total-5">0</td>
+                        <td id="total-6">0</td>
+                        <td id="total-7">0</td>
+                        <td id="total-8">0</td>
+                        <td id="total-9">0</td>
+                        <td id="total-10">0</td>
+                        <td id="total-11">0</td>
+                        <td id="grandTotal">0</td>
+                        <td>100%</td>
+                        <td>-</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        
+        <div class="summary-cards">
+            <div class="summary-card">
+                <h3>Total Contributions</h3>
+                <p class="value" id="totalRWF">0 RWF</p>
+            </div>
+            <div class="summary-card">
+                <h3>Current USD Value</h3>
+                <p class="value" id="totalUSD">$0</p>
+            </div>
+            <div class="summary-card">
+                <h3>Active Members</h3>
+                <p class="value" id="memberCount">0</p>
+            </div>
+            <div class="summary-card">
+                <h3>Average Monthly</h3>
+                <p class="value" id="avgMonthly">0 RWF</p>
+            </div>
+        </div>
+        
+        <div class="conversion-section">
+            <h3>Quarterly USD Conversions</h3>
+            <p>Every 3 months, convert total balance to USD to preserve value against currency fluctuations.</p>
+            
+            <div class="quarterly-summary">
+                <div class="quarter-card" id="q1-card">
+                    <h4>Q1 (Mar)</h4>
+                    <div>RWF: <span id="q1-rwf">0</span></div>
+                    <div>USD: <span id="q1-usd">$0</span></div>
+                </div>
+                <div class="quarter-card" id="q2-card">
+                    <h4>Q2 (Jun)</h4>
+                    <div>RWF: <span id="q2-rwf">0</span></div>
+                    <div>USD: <span id="q2-usd">$0</span></div>
+                </div>
+                <div class="quarter-card" id="q3-card">
+                    <h4>Q3 (Sep)</h4>
+                    <div>RWF: <span id="q3-rwf">0</span></div>
+                    <div>USD: <span id="q3-usd">$0</span></div>
+                </div>
+                <div class="quarter-card" id="q4-card">
+                    <h4>Q4 (Dec)</h4>
+                    <div>RWF: <span id="q4-rwf">0</span></div>
+                    <div>USD: <span id="q4-usd">$0</span></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="download-section">
+            <button class="download-btn" onclick="downloadExcel()">Download Excel Template</button>
+        </div>
+    </div>
+
+    <script>
+        // Data storage for members and their contributions
+        let members = [];
+
+        // Load saved data from localStorage
+        function loadFromStorage() {
+            const saved = localStorage.getItem('familyInvestmentData');
+            if (saved) {
+                members = JSON.parse(saved);
+            }
+        }
+
+        // Save current data to localStorage
+        function saveToStorage() {
+            localStorage.setItem('familyInvestmentData', JSON.stringify(members));
+        }
+
+        // Format numbers with commas and optionally currency
+        function formatNumber(num, currency = '') {
+            return num.toLocaleString(undefined, { maximumFractionDigits: 2 }) + (currency ? ' ' + currency : '');
+        }
+
+        // Add a new member to the list
+        function addMember() {
+            const nameInput = document.getElementById('memberNameInput');
+            const name = nameInput.value.trim();
+            if (name === '') {
+                alert('Please enter a member name');
+                return;
+            }
+
+            // Check if member already exists (case insensitive)
+            if (members.some(m => m.name.toLowerCase() === name.toLowerCase())) {
+                alert('Member already exists.');
+                return;
+            }
+
+            // Initialize monthly contributions array to 0 for 12 months
+            const newMember = {
+                name: name,
+                contributions: Array(12).fill(0),
+            };
+            members.push(newMember);
+            nameInput.value = '';
+            saveToStorage();
+            renderTable();
+        }
+
+        // Delete a member by index
+        function deleteMember(index) {
+            if (confirm(`Are you sure you want to remove ${members[index].name}?`)) {
+                members.splice(index, 1);
+                saveToStorage();
+                renderTable();
+            }
+        }
+
+        // Update contribution amount when user edits input
+        function updateContribution(memberIndex, monthIndex, input) {
+            let val = parseInt(input.value);
+            if (isNaN(val) || val < 0) {
+                val = 0;
+            }
+            members[memberIndex].contributions[monthIndex] = val;
+            saveToStorage();
+            calculateAll();
+        }
+
+        // Calculate total contributions per member, monthly totals, and share percentages
+        function calculateAll() {
+            const minAmount = parseInt(document.getElementById('minAmount').value) || 0;
+            const exchangeRate = parseFloat(document.getElementById('exchangeRate').value) || 1;
+
+            // Monthly totals for all members
+            const monthlyTotals = Array(12).fill(0);
+            // Total RWF sum for all members over the year
+            let grandTotal = 0;
+
+            // Sum monthly contributions for each member
+            members.forEach(m => {
+                m.total = m.contributions.reduce((a, b) => a + b, 0);
+                grandTotal += m.total;
+                for (let i = 0; i < 12; i++) {
+                    monthlyTotals[i] += m.contributions[i];
+                }
+            });
+
+            // Calculate share % per member
+            members.forEach(m => {
+                m.share = grandTotal === 0 ? 0 : (m.total / grandTotal) * 100;
+            });
+
+            // Update table footer with monthly totals
+            for (let i = 0; i < 12; i++) {
+                document.getElementById(`total-${i}`).textContent = formatNumber(monthlyTotals[i]);
+            }
+            document.getElementById('grandTotal').textContent = formatNumber(grandTotal);
+            
+            // Update summary cards
+            document.getElementById('totalRWF').textContent = formatNumber(grandTotal, 'RWF');
+            document.getElementById('totalUSD').textContent = '$' + formatNumber(grandTotal / exchangeRate);
+            document.getElementById('memberCount').textContent = members.length;
+            document.getElementById('avgMonthly').textContent = formatNumber(grandTotal / 12, 'RWF');
+
+            // Update quarterly conversions
+            updateQuarterlyConversions(exchangeRate);
+
+            renderTable();
+        }
+
+        // Calculate and show quarterly totals and USD conversions
+        function updateQuarterlyConversions(exchangeRate) {
+            // Quarterly indices for months
+            const quarters = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [9, 10, 11]
+            ];
+            
+            quarters.forEach((qMonths, qIndex) => {
+                let qTotal = 0;
+                members.forEach(m => {
+                    qMonths.forEach(mo => {
+                        qTotal += m.contributions[mo];
+                    });
+                });
+
+                document.getElementById(`q${qIndex+1}-rwf`).textContent = formatNumber(qTotal);
+                document.getElementById(`q${qIndex+1}-usd`).textContent = '$' + formatNumber(qTotal / exchangeRate);
+            });
+        }
+
+        // Render the members table body
+        function renderTable() {
+            const tbody = document.getElementById('membersBody');
+            tbody.innerHTML = '';
+            const minAmount = parseInt(document.getElementById('minAmount').value) || 0;
+
+            members.forEach((m, memberIndex) => {
+                const tr = document.createElement('tr');
+
+                // Member name cell
+                const nameCell = document.createElement('td');
+                nameCell.classList.add('member-name');
+                nameCell.textContent = m.name;
+                tr.appendChild(nameCell);
+
+                // Contribution cells for each month
+                m.contributions.forEach((amount, monthIndex) => {
+                    const td = document.createElement('td');
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.min = '0';
+                    input.value = amount;
+                    input.classList.add('amount-input');
+                    if (amount < minAmount) {
+                        input.classList.add('below-min');
+                    }
+                    input.onchange = () => updateContribution(memberIndex, monthIndex, input);
+                    td.appendChild(input);
+                    tr.appendChild(td);
+                });
+
+                // Total contributions cell
+                const totalCell = document.createElement('td');
+                totalCell.textContent = formatNumber(m.total || 0);
+                tr.appendChild(totalCell);
+
+                // Share % cell
+                const shareCell = document.createElement('td');
+                shareCell.textContent = ((m.share || 0).toFixed(2)) + '%';
+                tr.appendChild(shareCell);
+
+                // Action cell (delete button)
+                const actionCell = document.createElement('td');
+                const delBtn = document.createElement('button');
+                delBtn.textContent = 'Delete';
+                delBtn.classList.add('delete-btn');
+                delBtn.onclick = () => deleteMember(memberIndex);
+                actionCell.appendChild(delBtn);
+                tr.appendChild(actionCell);
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Download Excel template with current data and formulas (basic)
+        function downloadExcel() {
+            alert('This feature is not implemented yet, but will export data in Excel format with formulas.');
+            // You could integrate a library like SheetJS here in the future.
+        }
+
+        // Allow pressing Enter to add member in input box
+        document.getElementById('memberNameInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                addMember();
+            }
+        });
+
+        // When min amount or exchange rate or month changes, recalculate all
+        document.getElementById('minAmount').addEventListener('change', calculateAll);
+        document.getElementById('exchangeRate').addEventListener('change', calculateAll);
+        document.getElementById('currentMonth').addEventListener('change', calculateAll);
+
+        // Load saved data on page load
+        window.onload = () => {
+            loadFromStorage();
+            calculateAll();
+        };
+    </script>
+</body>
+</html>
